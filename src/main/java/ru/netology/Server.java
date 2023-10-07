@@ -8,17 +8,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-//    private static final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
+    //    private static final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
     private static ExecutorService threadPool;
-    private static ConcurrentHashMap<String, Map<String, Handlers>> handlers;
+    private static ConcurrentHashMap<String, ConcurrentHashMap<String, Handlers>> handlers;
 
     public Server(int threads) {
         threadPool = Executors.newFixedThreadPool(threads);
@@ -56,7 +55,7 @@ public class Server {
 
             handlers.get(request.getMethod()).get(request.getPath()).handle(request, out);
 
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
     }
@@ -73,7 +72,7 @@ public class Server {
 
     public void addHandler(String method, String path, Handlers handlers) {
         if (!Server.handlers.containsKey(method)) {
-            Server.handlers.put(method, new HashMap<>());
+            Server.handlers.put(method, new ConcurrentHashMap<>());
         }
         Server.handlers.get(method).put(path, handlers);
     }
