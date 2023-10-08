@@ -1,23 +1,24 @@
 package ru.netology;
 
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.net.URIBuilder;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class Request {
     private final String method;
     private final String path;
     private final String version;
-    private static List<NameValuePair> queryParams;
+    private final List<NameValuePair> queryParams;
 
     private Request(String method, String path, String version) throws URISyntaxException {
         this.method = method;
         this.path = path;
         this.version = version;
-        queryParams = getQueryParams();
+        this.queryParams = parseQueryParams();
         System.out.println("queryParams: " + getQueryParams());
         System.out.println("queryParam for 'last': " + getQueryParam("last") + " (for example)");
     }
@@ -29,8 +30,12 @@ public class Request {
         return new Request(method, path, version);
     }
 
-    public List<NameValuePair> getQueryParams() throws URISyntaxException {
-        return new URIBuilder(new URI(path)).getQueryParams();
+    private List<NameValuePair> parseQueryParams() throws URISyntaxException {
+        return URLEncodedUtils.parse(new URI(path), StandardCharsets.UTF_8);
+    }
+
+    public List<NameValuePair> getQueryParams() {
+        return queryParams;
     }
 
     public String getQueryParam(String name) {
